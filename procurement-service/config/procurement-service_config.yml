@@ -3,18 +3,16 @@
 ######################################
 
 # Apollo STOMP Broker Configuration
-# FIXME - Replace 99999 with your ID
 stompQueueName: /queue/69676.book.orders
 
 # Procurement Service needs to publish to all topics!
-# FIXME - Replace 99999 with your ID
 stompTopicName: /topic/69676.book.*
 
 # TODO: Apollo STOMP Broker URL and login
 #apolloUser: "admin"
 #apolloPassword: "password"
 #apolloHost: "54.215.210.214"
-#apolloPort: 61613
+#apolloPort: 61680
 
 # HTTP-specific options.
 http:
@@ -70,3 +68,5 @@ logging:
 
     # The timezone used to format dates. HINT: USE THE DEFAULT, UTC.
     timeZone: UTC
+    
+  

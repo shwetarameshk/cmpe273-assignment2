@@ -8,6 +8,9 @@ stompQueueName: /queue/69676.book.orders
 # Library B subscribes to the Computer category ONLY!
 stompTopicName: /topic/69676.book.computer
 
+libraryName: library-b
+
+
 # TODO: Apollo STOMP Broker URL and login
 #apolloUser: "admin"
 #apolloPassword: "password"

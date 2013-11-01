@@ -29,8 +29,6 @@ import javax.jms.Connection;
 import javax.jms.DeliveryMode;
 import javax.jms.Destination;
 import javax.jms.JMSException;
-import javax.jms.Message;
-import javax.jms.MessageConsumer;
 import javax.jms.MessageProducer;
 import javax.jms.Session;
 import javax.jms.TextMessage;
@@ -45,6 +43,7 @@ import org.fusesource.stomp.jms.message.StompJmsMessage;
 public class BookResource {
     /** bookRepository instance */
     private final BookRepositoryInterface bookRepository;
+    private String libraryName;
 
     /**
      * BookResource constructor
@@ -52,8 +51,9 @@ public class BookResource {
      * @param bookRepository
      *            a BookRepository instance
      */
-    public BookResource(BookRepositoryInterface bookRepository) {
+    public BookResource(BookRepositoryInterface bookRepository, String libraryName) {
 	this.bookRepository = bookRepository;
+	this.libraryName = libraryName;
     }
 
     @GET
@@ -103,12 +103,14 @@ public class BookResource {
 	    @DefaultValue("available") @QueryParam("status") Status status) throws JMSException {
 	Book book = bookRepository.getBookByISBN(isbn.get());
 	
-	
+	//update status
 	book.setStatus(status);
-
+	
 	if (status.equals(Status.lost)){
 		createNewBookOrder(isbn);
 	}
+	
+	
 	BookDto bookResponse = new BookDto(book);
 	String location = "/books/" + book.getIsbn();
 	bookResponse.addLink(new LinkDto("view-book", location, "GET"));
@@ -116,16 +118,26 @@ public class BookResource {
 	return Response.status(200).entity(bookResponse).build();
     }
     
-    private static String env(String key, String defaultValue) {
-	String rc = System.getenv(key);
-	if( rc== null ) {
-	    return defaultValue;
-	}
-	return rc;
-    }
 
-    private static String arg(int index, String defaultValue) {
-	    return defaultValue;
+    public void updateNewBook(){
+    
+    	LongParam isbn = null;
+    	
+    	if (bookRepository.getBookByISBN(isbn.get()) == null){
+
+    		//create new book
+    		createBook(new Book());
+    	}
+    		
+    	else{
+    		
+    		//update book status to available
+    	}
+
+    	Book book = bookRepository.getBookByISBN(isbn.get());
+    	
+    	
+    
     }
     
     public void createNewBookOrder(LongParam isbn) throws JMSException {
@@ -147,20 +159,30 @@ public class BookResource {
     	producer.setDeliveryMode(DeliveryMode.NON_PERSISTENT);
 
     	System.out.println("Sending messages to " + queue + "...");
-    	//String data = "Hello World";
     	BookOrder orderMsg = new BookOrder();
     	orderMsg.setIsbn(isbn);
-    	orderMsg.setLibraryName("library-a");   
+    	orderMsg.setLibraryName(libraryName);   
     	String data = orderMsg.getLibraryName()+":"+orderMsg.getIsbn();
     	
     	TextMessage msg = session.createTextMessage(data);
     	msg.setLongProperty("id", System.currentTimeMillis());
-    	producer.send(msg);
-
-    	producer.send(session.createTextMessage("SHUTDOWN"));
+    	producer.send(msg);    	
     	connection.close();
     }
+    
+    private static String env(String key, String defaultValue) {
+		String rc = System.getenv(key);
+		if( rc== null ) {
+		    return defaultValue;
+		}
+		return rc;
+    }
 
+    private static String arg(int index, String defaultValue) {
+	    return defaultValue;
+    }
+    
+    
     @DELETE
     @Path("/{isbn}")
     @Timed(name = "delete-book")

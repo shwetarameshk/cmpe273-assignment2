@@ -8,6 +8,8 @@ stompQueueName: /queue/69676.book.orders
 # Library A subscribes to all book categories
 stompTopicName: /topic/69676.book.*
 
+libraryName: library-a
+
 # TODO: Apollo STOMP Broker URL and login
 #apolloUser: "admin"
 #apolloPassword: "password"

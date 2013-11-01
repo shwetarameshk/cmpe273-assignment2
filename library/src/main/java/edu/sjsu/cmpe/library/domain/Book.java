@@ -127,5 +127,16 @@ public class Book {
     public void setStatus(Status status) {
 	this.status = status;
     }
+    
+    public void updateBook(String newBook){
+    
+    	String[] bookDetails = newBook.split(":");
+    	this.isbn=bookDetails[0].length();
+    	this.title=bookDetails[1];
+    	this.category=bookDetails[2];
+    	//this.coverimage=bookDetails[3];
+    	this.status=Status.available;
+    
+    }
 
 }

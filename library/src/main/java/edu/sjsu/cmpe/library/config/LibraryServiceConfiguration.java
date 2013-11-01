@@ -14,7 +14,19 @@ public class LibraryServiceConfiguration extends Configuration {
     @JsonProperty
     private String stompTopicName;
 
-    /**
+    @NotEmpty
+    @JsonProperty
+    private String libraryName;
+    
+    public String getLibraryName() {
+		return libraryName;
+	}
+
+	public void setLibraryName(String libraryName) {
+		this.libraryName = libraryName;
+	}
+
+	/**
      * @return the stompQueueName
      */
     public String getStompQueueName() {
