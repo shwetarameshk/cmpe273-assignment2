@@ -21,7 +21,6 @@ import com.yammer.dropwizard.views.ViewBundle;
 
 import edu.sjsu.cmpe.library.api.resources.BookResource;
 import edu.sjsu.cmpe.library.api.resources.RootResource;
-import edu.sjsu.cmpe.library.config.LibraryName;
 import edu.sjsu.cmpe.library.config.LibraryServiceConfiguration;
 import edu.sjsu.cmpe.library.repository.BookRepository;
 import edu.sjsu.cmpe.library.repository.BookRepositoryInterface;
@@ -31,30 +30,34 @@ public class LibraryService extends Service<LibraryServiceConfiguration> {
 
     private final Logger log = LoggerFactory.getLogger(getClass());
     
-    private String libraryName = "library-a";
+    private static String libraryName ;
     
     
-
     public String getLibraryName() {
-                return libraryName;
-        }
+    	return libraryName;
+    }
+    
 
-        public void setLibraryName(String libraryName) {
-                this.libraryName = libraryName;
+        public static void setLibraryName(String args[]) {
+        	
+        	if (args[1].contains("library_a"))
+        		libraryName = "library-a";
+        	else if (args[1].contains("library_b"))
+        		libraryName = "library-b";
+        	else
+        		libraryName = "library-x";
         }
 
         public static void main(String[] args) throws Exception {
-        new LibraryService().run(args);
-    }
+	        setLibraryName(args);
+	        new LibraryService().run(args);
+        }
 
     @Override
     public void initialize(Bootstrap<LibraryServiceConfiguration> bootstrap) {
         bootstrap.setName("library-service");
         bootstrap.addBundle(new ViewBundle());
-        
-        
-        
-        
+              
         Thread one = new Thread(new Runnable(){
                 public void run(){
                         try {
@@ -69,7 +72,8 @@ public class LibraryService extends Service<LibraryServiceConfiguration> {
 
         public void startListener() throws JMSException{
                     
-                    String libraryName = LibraryName.libraryName;
+                    String libraryName = getLibraryName();
+                    System.out.println(libraryName);
                     String user = env("APOLLO_USER", "admin");
                     String password = env("APOLLO_PASSWORD", "password");
                     String host = env("APOLLO_HOST", "54.215.210.214");
@@ -77,7 +81,7 @@ public class LibraryService extends Service<LibraryServiceConfiguration> {
                     String destination = null;
                     if(libraryName.equals("library-a"))
                             destination = arg(0, "/topic/69676.book.*");
-                    else
+                    else if(libraryName.equals("library-b"))
                             destination = arg(0, "/topic/69676.book.computer");                           
                                     
         
@@ -137,8 +141,7 @@ public class LibraryService extends Service<LibraryServiceConfiguration> {
         String queueName = configuration.getStompQueueName();
         String topicName = configuration.getStompTopicName();
         
-        //setLibraryName(configuration.getLibraryName());
-        LibraryName.libraryName = configuration.getLibraryName();
+        libraryName = configuration.getLibraryName();
         
         log.debug("Queue name is {}. Topic name is {}", queueName,topicName);
         log.debug("Library name is {}",libraryName);
@@ -147,7 +150,7 @@ public class LibraryService extends Service<LibraryServiceConfiguration> {
         environment.addResource(RootResource.class);
         /** Books APIs */
         BookRepositoryInterface bookRepository = new BookRepository();
-        //environment.addResource(new BookResource(bookRepository,libraryName));
+        environment.addResource(new BookResource(bookRepository,libraryName));
 
         /** UI Resources */
         environment.addResource(new HomeResource(bookRepository));

@@ -63,9 +63,8 @@ public class ProcurementResource extends Job {
 	@Override	
 	public void doJob() throws Exception{
 		
-		pullMessageFromQueue();		
+		pullMessageFromQueue();	
 		
-		//getDataFromPublisher();
 		ShippedBooks shippedBooks = getDataFromPublisher();
 		
 		for (int i = 0; i<shippedBooks.getNumBooks();i++){
@@ -181,8 +180,6 @@ public class ProcurementResource extends Job {
 		producer.send(msg);
 		
 		System.out.println(msg.toString());
-
-		//producer.send(session.createTextMessage("SHUTDOWN"));
 		connection.close();
 	}
 	
@@ -191,20 +188,11 @@ public class ProcurementResource extends Job {
 		System.out.println("get method");
 		
 		Client client = Client.create();
-		WebResource webResource = client.resource("http://54.215.210.214:9000/orders/69676");
-		
+		WebResource webResource = client.resource("http://54.215.210.214:9000/orders/69676");		
 		ClientResponse response = webResource.accept("application/json").get(ClientResponse.class);
-		
-		
 		ShippedBooks shippedBooks = response.getEntity(ShippedBooks.class);
-	
 		System.out.println(response.getStatus());
-		//System.out.println(book.getCategory());
-		
-		//return book.getCategory();
-		
 		return shippedBooks;
-		
 	}
 	
 	public String createMessage (Book shippedBook){

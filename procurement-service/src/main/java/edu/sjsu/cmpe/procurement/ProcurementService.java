@@ -31,9 +31,7 @@ public class ProcurementService extends Service<ProcurementServiceConfiguration>
     	
 	String queueName = configuration.getStompQueueName();
 	String topicName = configuration.getStompTopicName();
-	//String libraryName = configuration.getLibraryName();
 	log.debug("Queue name is {}. Topic is {}", queueName, topicName);
-	//log.debug("Library name is {}",libraryName);
 
 	
 	environment.addResource(RootResource.class);
