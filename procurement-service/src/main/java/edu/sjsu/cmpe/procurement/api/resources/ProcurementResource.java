@@ -30,7 +30,7 @@ import edu.sjsu.cmpe.procurement.domain.BookOrder;
 import edu.sjsu.cmpe.procurement.domain.ShippedBooks;
 
 
-@Every("30s")
+@Every("5mn")
 public class ProcurementResource extends Job {
 	
 	private int numMessages = 0;
@@ -94,7 +94,7 @@ public class ProcurementResource extends Job {
 	MessageConsumer consumer = session.createConsumer(dest);
 
 	System.out.println("Waiting for messages from " + queue + "...");
-	long waitUntil = 5000; // wait for 10 sec
+	long waitUntil = 10000; // wait for 10 sec
 	Message msg = null;
 	String body = null;
 	while(true) {
@@ -111,8 +111,8 @@ public class ProcurementResource extends Job {
 			} catch (JMSException e) {
 				e.printStackTrace();
 			}
-	           System.out.println("Received message = " + body);	          
-	           //incrementNumMessages();
+	           System.out.println("Received message = " + body);	       
+	           
 	           //get ISBN from message and add it to list of ISBNs
 	           addIsbn(Integer.parseInt(body.split(":")[1]));
 	          
@@ -120,8 +120,8 @@ public class ProcurementResource extends Job {
 	    } 
 	    else if (msg == null) {
 	          System.out.println("No new messages. Exiting due to timeout - " + waitUntil / 1000 + " sec");
-	          if (getNumMessages()>=0){
-	        	  //System.out.println(getNumMessages() + " messages received");
+	          if (getNumMessages()>0){
+	        	  
 	        	  List<Integer> isbnFromQueue = new ArrayList<>();
 	        	  isbnFromQueue = getIsbns();
 	        	  sendPostRequest(isbnFromQueue);
@@ -153,7 +153,7 @@ public class ProcurementResource extends Job {
 		WebResource webResource = client.resource("http://54.215.210.214:9000/orders");
 		ClientResponse response = webResource.type("application/json").post(ClientResponse.class,bookOrder);
 
-		System.out.println(response.getEntity(String.class));	
+		System.out.println("Status returned on POST: " + response.getStatus());	
 	
 	}
 	
@@ -186,20 +186,17 @@ public class ProcurementResource extends Job {
 	
 	public ShippedBooks getDataFromPublisher(){
 		
-		System.out.println("get method");
-		
 		Client client = Client.create();
 		WebResource webResource = client.resource("http://54.215.210.214:9000/orders/69676");		
 		ClientResponse response = webResource.accept("application/json").get(ClientResponse.class);
 		ShippedBooks shippedBooks = response.getEntity(ShippedBooks.class);
-		System.out.println(response.getStatus());
+		System.out.println("Status returned on GET: " + response.getStatus());
 		return shippedBooks;
 	}
 	
 	public String createMessage (Book shippedBook){
 		
-		String message = shippedBook.getIsbn()+":"+shippedBook.getTitle()+":"+shippedBook.getCategory()+":"+shippedBook.getCoverimage();
-		
+		String message = shippedBook.getIsbn()+":"+shippedBook.getTitle()+":"+shippedBook.getCategory()+":"+shippedBook.getCoverimage();	
 		return message;
 	}
 	

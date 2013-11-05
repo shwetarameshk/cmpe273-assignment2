@@ -24,6 +24,7 @@ import edu.sjsu.cmpe.library.api.resources.BookResource;
 import edu.sjsu.cmpe.library.api.resources.RootResource;
 import edu.sjsu.cmpe.library.config.LibraryServiceConfiguration;
 import edu.sjsu.cmpe.library.domain.Book;
+import edu.sjsu.cmpe.library.domain.Book.Status;
 import edu.sjsu.cmpe.library.repository.BookRepository;
 import edu.sjsu.cmpe.library.repository.BookRepositoryInterface;
 import edu.sjsu.cmpe.library.ui.resources.HomeResource;
@@ -131,18 +132,23 @@ public class LibraryService extends Service<LibraryServiceConfiguration> {
             }
         
         
-        public void updateRepository(String newBook){
+        public void updateRepository(String bookReceived){
             
-        	String[] bookDetails = newBook.split(":");
+        	String[] bookDetails = bookReceived.split(":");
         	long isbn=Integer.parseInt(bookDetails[0]);
         	Book book = bookRepository.getBookByISBN(isbn);
-        	System.out.println("book exists " + book.getIsbn());
-            //Book book = new Book();
-           // book.updateBook(body);
+        	if (book!=null){
+        		//Book exists in library
+        		book.setStatus(Status.available);
+        	}
+        	else{
+        		//Add book to library
+        		book = new Book();
+        		book.addNewBook(bookReceived);
+        		bookRepository.addNewBook(book);
+        	}
         }
-        
-        
-        
+                
         private static String env(String key, String defaultValue) {
                 String rc = System.getenv(key);
                 if( rc== null ) {
