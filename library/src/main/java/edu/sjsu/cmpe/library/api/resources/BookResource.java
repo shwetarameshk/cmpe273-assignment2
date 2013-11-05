@@ -35,7 +35,6 @@ import javax.jms.TextMessage;
 
 import org.fusesource.stomp.jms.StompJmsConnectionFactory;
 import org.fusesource.stomp.jms.StompJmsDestination;
-import org.fusesource.stomp.jms.message.StompJmsMessage;
 
 @Path("/v1/books")
 @Produces(MediaType.APPLICATION_JSON)
@@ -108,8 +107,7 @@ public class BookResource {
 	
 	if (status.equals(Status.lost)){
 		createNewBookOrder(isbn);
-	}
-	
+	}	
 	
 	BookDto bookResponse = new BookDto(book);
 	String location = "/books/" + book.getIsbn();
@@ -117,28 +115,7 @@ public class BookResource {
 
 	return Response.status(200).entity(bookResponse).build();
     }
-    
 
-    public void updateNewBook(){
-    
-    	LongParam isbn = null;
-    	
-    	if (bookRepository.getBookByISBN(isbn.get()) == null){
-
-    		//create new book
-    		createBook(new Book());
-    	}
-    		
-    	else{
-    		
-    		//update book status to available
-    	}
-
-    	Book book = bookRepository.getBookByISBN(isbn.get());
-    	
-    	
-    
-    }
     
     public void createNewBookOrder(LongParam isbn) throws JMSException {
     	String user = env("APOLLO_USER", "admin");

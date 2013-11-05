@@ -30,25 +30,25 @@ import edu.sjsu.cmpe.procurement.domain.BookOrder;
 import edu.sjsu.cmpe.procurement.domain.ShippedBooks;
 
 
-@Every("10s")
+@Every("30s")
 public class ProcurementResource extends Job {
 	
 	private int numMessages = 0;
-	private int[] isbns = new int[50];
+	private List<Integer> isbns = new ArrayList<>();
 	
 	
-	public int[] getIsbns() {
+	public List<Integer> getIsbns() {
 		return isbns;
 	}
 
+	
 	public void addIsbn(int isbn) {
-		isbns[numMessages-1]=isbn;
+		isbns.add(isbn);
 	}
 	
-	public void removeIsbn(){
-		
-		for (int i = 0 ; i<50; i++)
-		isbns[i]=0;
+	public void removeIsbn(List<Integer> isbnFromQueue){
+		for (int i =0; i<isbnFromQueue.size(); i++)
+			isbns.remove(i);
 	}
 
 	public void incrementNumMessages() {
@@ -111,20 +111,21 @@ public class ProcurementResource extends Job {
 			} catch (JMSException e) {
 				e.printStackTrace();
 			}
-	           System.out.println("Received message = " + body);
-	           
+	           System.out.println("Received message = " + body);	          
+	           //incrementNumMessages();
 	           //get ISBN from message and add it to list of ISBNs
 	           addIsbn(Integer.parseInt(body.split(":")[1]));
-	           
-	           incrementNumMessages();
+	          
 	           
 	    } 
 	    else if (msg == null) {
 	          System.out.println("No new messages. Exiting due to timeout - " + waitUntil / 1000 + " sec");
-	          if (getNumMessages()==0){
-	        	  System.out.println(getNumMessages() + " messages received");
-	        	  sendPostRequest(getIsbns());
-	        	  removeIsbn();
+	          if (getNumMessages()>=0){
+	        	  //System.out.println(getNumMessages() + " messages received");
+	        	  List<Integer> isbnFromQueue = new ArrayList<>();
+	        	  isbnFromQueue = getIsbns();
+	        	  sendPostRequest(isbnFromQueue);
+	        	  removeIsbn(isbnFromQueue);
 	          }
 	        	  
 	          break;
@@ -142,11 +143,11 @@ public class ProcurementResource extends Job {
 	}
 	
 	
-	public void sendPostRequest(int[] isbnList){
+	public void sendPostRequest(List<Integer> isbnFromQueue){
 		
 		BookOrder bookOrder = new BookOrder();
 		bookOrder.setId("69676");
-		bookOrder.setOrderBookIsbns(isbnList);
+		bookOrder.setOrderBookIsbns(isbnFromQueue);
 		
 		Client client = Client.create();
 		WebResource webResource = client.resource("http://54.215.210.214:9000/orders");

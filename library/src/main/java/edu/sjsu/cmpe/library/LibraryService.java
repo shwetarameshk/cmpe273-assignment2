@@ -17,11 +17,13 @@ import org.slf4j.LoggerFactory;
 import com.yammer.dropwizard.Service;
 import com.yammer.dropwizard.config.Bootstrap;
 import com.yammer.dropwizard.config.Environment;
+import com.yammer.dropwizard.jersey.params.LongParam;
 import com.yammer.dropwizard.views.ViewBundle;
 
 import edu.sjsu.cmpe.library.api.resources.BookResource;
 import edu.sjsu.cmpe.library.api.resources.RootResource;
 import edu.sjsu.cmpe.library.config.LibraryServiceConfiguration;
+import edu.sjsu.cmpe.library.domain.Book;
 import edu.sjsu.cmpe.library.repository.BookRepository;
 import edu.sjsu.cmpe.library.repository.BookRepositoryInterface;
 import edu.sjsu.cmpe.library.ui.resources.HomeResource;
@@ -32,6 +34,7 @@ public class LibraryService extends Service<LibraryServiceConfiguration> {
     
     private static String libraryName ;
     
+    static BookRepositoryInterface bookRepository;
     
     public String getLibraryName() {
     	return libraryName;
@@ -48,7 +51,10 @@ public class LibraryService extends Service<LibraryServiceConfiguration> {
         		libraryName = "library-x";
         }
 
+        
         public static void main(String[] args) throws Exception {
+        	
+        	bookRepository = new BookRepository();
 	        setLibraryName(args);
 	        new LibraryService().run(args);
         }
@@ -117,9 +123,25 @@ public class LibraryService extends Service<LibraryServiceConfiguration> {
                         } else {
                             System.out.println("Unexpected message type: "+msg.getClass());
                         }
+                        updateRepository(body); 
                     }
+
+                                       
                     connection.close();
             }
+        
+        
+        public void updateRepository(String newBook){
+            
+        	String[] bookDetails = newBook.split(":");
+        	long isbn=Integer.parseInt(bookDetails[0]);
+        	Book book = bookRepository.getBookByISBN(isbn);
+        	System.out.println("book exists " + book.getIsbn());
+            //Book book = new Book();
+           // book.updateBook(body);
+        }
+        
+        
         
         private static String env(String key, String defaultValue) {
                 String rc = System.getenv(key);
@@ -149,7 +171,7 @@ public class LibraryService extends Service<LibraryServiceConfiguration> {
         /** Root API */
         environment.addResource(RootResource.class);
         /** Books APIs */
-        BookRepositoryInterface bookRepository = new BookRepository();
+        
         environment.addResource(new BookResource(bookRepository,libraryName));
 
         /** UI Resources */

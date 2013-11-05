@@ -17,8 +17,9 @@ public class BookOrder {
 		return orderBookIsbns;
 	}
 	
-	public void setOrderBookIsbns(int[] orderBookIsbns) {
-		this.orderBookIsbns = orderBookIsbns;
+	public void setOrderBookIsbns(List<Integer> isbnFromQueue) {
+		for (int i = 0; i<isbnFromQueue.size(); i++)
+				this.orderBookIsbns[i] = isbnFromQueue.get(i);
 	}
 	
 	/*public List<Integer> getOrderBookIsbns() {

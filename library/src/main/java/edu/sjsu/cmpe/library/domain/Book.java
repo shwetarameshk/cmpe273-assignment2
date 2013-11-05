@@ -135,8 +135,7 @@ public class Book {
     	this.title=bookDetails[1];
     	this.category=bookDetails[2];
     	//this.coverimage=bookDetails[3];
-    	this.status=Status.available;
-    
+    	this.status=Status.available;    
     }
 
 }
