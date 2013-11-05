@@ -139,7 +139,8 @@ public class LibraryService extends Service<LibraryServiceConfiguration> {
         	Book book = bookRepository.getBookByISBN(isbn);
         	if (book!=null){
         		//Book exists in library
-        		book.setStatus(Status.available);
+        		if (book.getStatus()==Status.lost)
+        			book.setStatus(Status.available);
         	}
         	else{
         		//Add book to library
